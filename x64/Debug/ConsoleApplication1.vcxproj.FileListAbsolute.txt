@@ -1,0 +1,14 @@
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\ConsoleApplication1.exe
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\ConsoleApplication1.vcxproj.CopyComplete
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\curlpp.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\libcurl-d.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\zlibd1.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\glfw3.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\pcl_kdtreed.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\pcl_commond.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\lz4d.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\proj_d.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\sqlite3.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\tiffd.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\jpeg62.dll
+C:\2021\BaiGe\terrain\ConsoleApplication1\x64\Debug\liblzma.dll
