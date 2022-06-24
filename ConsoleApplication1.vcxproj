@@ -146,11 +146,13 @@
     <ClCompile Include="geoUtil.cpp" />
     <ClCompile Include="getTerrain.cpp" />
     <ClCompile Include="KEY.cpp" />
+    <ClCompile Include="obj_profile.cpp" />
     <ClCompile Include="projection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="geoProc.h" />
     <ClInclude Include="getTerrain.h" />
+    <ClInclude Include="obj_profile.h" />
     <ClInclude Include="projection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

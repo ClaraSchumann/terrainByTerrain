@@ -1,11 +1,12 @@
-﻿
+﻿#include <iostream>
 
-#include <iostream>
-
+#include "yaml-cpp/yaml.h"
+#include <rapidxml/rapidxml.hpp>
 
 #include "projection.h"
 #include "getTerrain.h"
 #include "geoProc.h"
+#include "obj_profile.h"
 
 extern const char* workDirectory = "C:\\2021\\BaiGe\\GeoProcess\\";
 extern const char* terrainRaw = "C:\\2021\\BaiGe\\GeoProcess\\TerrainRaw\\";
@@ -19,38 +20,77 @@ extern int targetModel_origin_EPSG = 32647;
 extern double degree2meter = 111000; // Need not be precise.
 
 void snippets() {
-    // Download DEM.
-    double margin = 1;
-    double lon_cen = 98.7026;
-    double lat_cen = 31.0810;
-    int layer_lowest = 7, layer_highest = 12;
-    for (int layer = layer_lowest; layer <= layer_highest; layer++) {
-        downloadTerrainIn(lon_cen - margin, lon_cen + margin, lat_cen - margin, lat_cen + margin, layer);
-    };
+	// Download DEM.
+	double margin = 1;
+	double lon_cen = 98.7026;
+	double lat_cen = 31.0810;
+	int layer_lowest = 7, layer_highest = 12;
+	for (int layer = layer_lowest; layer <= layer_highest; layer++) {
+		//downloadTerrainIn(lon_cen - margin, lon_cen + margin, lat_cen - margin, lat_cen + margin, layer);
+	};
 
-    // Test download DEM. 
-    test();
+	// Test download DEM. 
+	test();
 
-    // Transform terrain object to WGS84, with the lon/lats scaled up by 111000 to make is prettier.
-    void terrainObjToWGS84();
+	// Transform terrain object to WGS84, with the lon/lats scaled up by 111000 to make is prettier.
+	void terrainObjToWGS84();
 
-    // Generate mosaicked DEM in .obj format.
-    auto [V, F] = geo_demo_3(12, 3170, 3172, 668, 672);
+	// Generate mosaicked DEM in .obj format.
+	// auto [V, F] = geo_demo_3(12, 3170, 3172, 668, 672);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    // 12 3170 - 3172 668 - 672 在图L12中间偏左位置
-    // 11 1584 - 1586 334 - 336 
-    //auto [V,F] = geo_demo_3(11, 1584, 1586, 334 , 336);
+	std::string configureFile;
+	if (argc < 2)
+		configureFile = "conf.yaml";
+	else
+		configureFile = argv[1];
+	auto configuration = YAML::LoadFile(configureFile.c_str());
 
-    interpolation(100);
+	auto obj_directory = configuration["obj_directory"].as<std::string>();
+	auto obj_directory_path = std::filesystem::path(obj_directory);
+	if (!std::filesystem::is_directory(obj_directory_path)) {
+		throw std::exception("Please verify the directory containing .obj files");
+	}
 
-    // Extend: 
-    // row: 341 369
-    // col: 142 181
+	ObjProfile src_obj_profile = getObjProfile(obj_directory_path / "metadata.xml");
 
-    regenerateDEMFiles("C:\\2021\\BaiGe\\GeoProcess\\TerrainModified", "C:\\2021\\BaiGe\\GeoProcess\\L12_rectified.obj", 12, 3170, 3172, 668, 672);
+	auto works = configuration["works"];
+	for (int i = 0; i < works.size(); i++) {
+		auto work = works[i];
+		if (!work["apply"].as<bool>()) {
+			continue;
+		};
 
-    return 0;
+		switch (auto operation = hash_djb2a(work["operation"].as<std::string>())) {
+		case "download_dem_raw"_sh: {
+			size_t layer_lowest = work["layer_lowest"].as<size_t>();
+			size_t layer_highest = work["layer_highest"].as<size_t>();
+			double margin = work["margin"].as<double>();
+			auto out_dem_directory = std::filesystem::path(work["out_dem_directory"].as<std::string>());
+			for (size_t layer = layer_lowest; layer <= layer_highest; layer++) {
+				downloadTerrainIn(src_obj_profile.wgs84_lon - margin, src_obj_profile.wgs84_lon + margin, src_obj_profile.wgs84_lat - margin, src_obj_profile.wgs84_lat + margin, layer, out_dem_directory);
+			};
+			break;
+		}
+		default:
+			std::cout << std::format("Operation {} not recognized!\n", operation);
+			break;
+		}
+	}
+
+	// 12 3170 - 3172 668 - 672 在图L12中间偏左位置
+	// 11 1584 - 1586 334 - 336 
+	//auto [V,F] = geo_demo_3(11, 1584, 1586, 334 , 336);
+
+	//interpolation(100);
+
+	// Extend: 
+	// row: 341 369
+	// col: 142 181
+
+	//regenerateDEMFiles("C:\\2021\\BaiGe\\GeoProcess\\TerrainModified", "C:\\2021\\BaiGe\\GeoProcess\\L12_rectified.obj", 12, 3170, 3172, 668, 672);
+
+	return 0;
 }

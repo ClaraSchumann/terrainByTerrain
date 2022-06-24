@@ -33,6 +33,9 @@
     <ClCompile Include="KEY.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="obj_profile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="projection.h">
@@ -42,6 +45,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="geoProc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="obj_profile.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

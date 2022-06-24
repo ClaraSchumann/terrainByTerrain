@@ -41,7 +41,15 @@ std::queue<tile> generateTerrainSetIn(double lon_start, double lon_end, double l
 	return toDownload;
 }
 
-void downloadTerrainSet(std::queue<tile> toDownload) {
+void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path& targetDir) {
+	if (!std::filesystem::is_directory(targetDir)) {
+		std::filesystem::create_directory(targetDir);
+	}
+
+	std::queue<std::string> hosts;
+	for (int i = 0; i < 8; i++) {
+		hosts.push(std::format("https://t{}.tianditu.gov.cn/mapservice/swdx?tk=5b14f0b6df5520545f0851e418afa219", i));
+	}
 
 	auto worker = [&](int idx) {
 		cURLpp::Easy request;
@@ -73,7 +81,7 @@ void downloadTerrainSet(std::queue<tile> toDownload) {
 			toDownload.pop();
 			m_ulock.unlock();
 
-			std::string target = std::format("https://t{}.tianditu.gov.cn/mapservice/swdx?tk=5b14f0b6df5520545f0851e418afa219&x={}&y={}&l={}", idx+1, t.x, t.y, t.l);
+			std::string target = std::format("https://t{}.tianditu.gov.cn/mapservice/swdx?tk=5b14f0b6df5520545f0851e418afa219&x={}&y={}&l={}", idx, t.x, t.y, t.l);
 			std::cout << std::format("Thread {} is retrieving file from : \n\t{} \n", idx + 1, target);
 
 			std::vector<std::string> headers;
@@ -126,7 +134,7 @@ void downloadTerrainSet(std::queue<tile> toDownload) {
 			char* buf = m_inflate(response.str(), &deflate_return);
 
 			std::stringstream ss;
-			std::string f_loc = terrainRaw + std::string("/") + t.ConvertToFilename();
+			std::string f_loc = targetDir.string() + std::string("/") + t.ConvertToFilename();
 			std::fstream f(f_loc, std::ios::binary | std::ios::out);
 			f.write(buf,deflate_return);
 			f.close();
@@ -163,10 +171,10 @@ void downloadTerrainSet(std::queue<tile> toDownload) {
 
 }
 
-void downloadTerrainIn(double lon_start, double lon_end, double lat_start, double lat_end, int layer) {
+void downloadTerrainIn(double lon_start, double lon_end, double lat_start, double lat_end, int layer, const std::filesystem::path& targetDir) {
 	std::queue<tile> toDownload = generateTerrainSetIn(lon_start, lon_end, lat_start, lat_end, layer);
 
-	downloadTerrainSet(toDownload);
+	downloadTerrainSet(toDownload, targetDir);
 }
 
 void test() {
@@ -174,5 +182,5 @@ void test() {
 	auto lon = getStartLon(12, 3377);
 	tile t(12, 3377, 576);
 
-	downloadTerrainSet(std::queue<tile>({ t }));
+	//downloadTerrainSet(std::queue<tile>({ t }));
 }

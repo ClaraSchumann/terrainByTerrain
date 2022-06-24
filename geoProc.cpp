@@ -62,7 +62,6 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> getTerrainVF() {
 
 		PJ_CONTEXT* C;
 		PJ* P;
-		PJ* norm;
 		PJ_COORD a, b;
 
 		C = proj_context_create();
