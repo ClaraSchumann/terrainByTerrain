@@ -1,0 +1,12 @@
+obj_directory: "C:/2021/model_0624/models/terra_obj"
+
+works:
+  - 
+    operation: download_dem_raw
+    apply: true
+    layer_lowest: 7
+    layer_highest: 12
+    margin: 1
+    out_dem_directory: "C:/2021/model_0624/mid/dem_raw"
+
+  
