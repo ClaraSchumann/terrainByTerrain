@@ -9,7 +9,6 @@ std::string url("https://t{}.tianditu.gov.cn/mapservice/swdx?tk=5b14f0b6df552054
 // Number of usable mirrors, will be used to replace the first curly brace in the url above.
 constexpr int NUM_THREADS = 8;
 
-std::mutex m_mutex;
 
 std::string tile::ConvertToFilename() {
 	return std::format("{}_{}_{}", l, x, y);
@@ -41,47 +40,65 @@ std::queue<tile> generateTerrainSetIn(double lon_start, double lon_end, double l
 	return toDownload;
 }
 
-void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path& targetDir) {
+void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path& targetDir,const std::string& user_token) {
 	if (!std::filesystem::is_directory(targetDir)) {
 		std::filesystem::create_directory(targetDir);
 	}
 
 	std::queue<std::string> hosts;
 	for (int i = 0; i < 8; i++) {
-		hosts.push(std::format("https://t{}.tianditu.gov.cn/mapservice/swdx?tk=5b14f0b6df5520545f0851e418afa219", i));
-	}
+		hosts.push(std::format("https://t{}.tianditu.gov.cn", i));
+	};
+
+	std::mutex m_mutex; // Mutex for task queue.
+	bool notified = false;
+
+	std::uniform_int_distribution<int> dice_distribution(1, 500);
+	std::mt19937 random_number_engine; // pseudorandom number generator
+	auto dice_roller = std::bind(dice_distribution, random_number_engine);
 
 	auto worker = [&](int idx) {
 		cURLpp::Easy request;
+
+		// TODO: Generate template headers automatically.
 		std::list<std::string> headers;
-		headers.push_back("Accept: */*");
+		headers.push_back("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
 		headers.push_back("Accept-Encoding: gzip, deflate, br");
 		headers.push_back("Accept-Language: zh-CN,zh;q=0.9");
 		headers.push_back("Cache-Control: no-cache");
+		headers.push_back("Pragma: no-cache");
 		headers.push_back("Connection: keep-alive");
-		//headers.push_back("Host: t5.tianditu.gov.cn");
 		//headers.push_back("Origin: http://localhost:8080");
-		//headers.push_back("Pragma: no-cache");
 		//headers.push_back("Referer: http://localhost:8080/");
 		headers.push_back("sec-ch-ua: \" Not A; Brand\";v=\"99\", \"Chromium\";v=\"102\", \"Google Chrome\";v=\"102\"");
 		headers.push_back("sec-ch-ua-mobile: ?0");
 		headers.push_back("sec-ch-ua-platform: \"Windows\"");
-		headers.push_back("Sec-Fetch-Dest: empty");
-		headers.push_back("Sec-Fetch-Mode: cors");
-		headers.push_back("Sec-Fetch-Site: cross-site");
+		headers.push_back("Sec-Fetch-Dest: document");
+		headers.push_back("Sec-Fetch-Mode: navigate");
+		headers.push_back("Sec-Fetch-User: ?1");
+		headers.push_back("Upgrade-Insecure-Requests: 1");
 		headers.push_back("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36");
 		request.setOpt(cURLpp::Options::HttpHeader(headers));
 
 		while (true) {
 			std::unique_lock<std::mutex> m_ulock(m_mutex);
-			if (toDownload.empty())
+			/*
+			* Active threads will not be fewer than remaining tasks.
+			*/ 
+			if (toDownload.empty() || hosts.empty())
 				return;
 
-			auto t = toDownload.front();
+			auto tile_to_download = toDownload.front();
+			auto host = hosts.front();
 			toDownload.pop();
+			hosts.pop();
 			m_ulock.unlock();
 
-			std::string target = std::format("https://t{}.tianditu.gov.cn/mapservice/swdx?tk=5b14f0b6df5520545f0851e418afa219&x={}&y={}&l={}", idx, t.x, t.y, t.l);
+			auto loc_headers = headers;
+			loc_headers.push_back("Host: " + host);
+
+			std::string target = std::format("/mapservice/swdx?tk={}&x={}&y={}&l={}",user_token, tile_to_download.x, tile_to_download.y, tile_to_download.l);
+			target = host + target;
 			std::cout << std::format("Thread {} is retrieving file from : \n\t{} \n", idx + 1, target);
 
 			std::vector<std::string> headers;
@@ -102,31 +119,53 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 			std::cout << pOpt->getValue() << std::endl;
 			*/
 
-			size_t max_repeat_times = 10;
+			size_t remaining_repest_times = 3;
 			bool s_flag = false;
-			while (max_repeat_times && !s_flag) {
+			while (remaining_repest_times && !s_flag) {
 				headers = {};
 				request.perform();
 				int return_code = std::stoi(headers[0].substr(9, 3));
 				if (return_code != 200) {
+					switch (return_code) {
+					case 418:
+						std::cout << std::format("Thread {} failed to access target url with return_code 418.\n\t{} blocked this address. \n", idx, host);
+						remaining_repest_times = 0;
+						continue;
+					case 403:
+						std::cout << std::format("Thread {} failed to access target url with return_code 403.\n\t{} refused the credentials. \n", idx, host);
+						remaining_repest_times = 0;
+						continue;
+					default:
+						std::cout << std::format("Thread {} failed to access target url with return_code {}. Retry.\n\t", idx,return_code, host);
+						break;
+					}
 					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-					max_repeat_times--;
-					std::cout << std::format("Thread {} failed to access target url, \n\t{} times remained. \n", idx + 1, max_repeat_times);
+					remaining_repest_times--;
+					std::cout << std::format("Thread {} failed to access target url, \n\t{} times remained. \n", idx, remaining_repest_times);
 				}
 				else {
-					std::cout << std::format("Thread {} access target url successfully. \n\t{}\n", idx + 1, target);
+					std::cout << std::format("Thread {} access target url successfully. \n\t{}\n", idx, target);
 					s_flag = true;
 				}
 			};
 
 			if (!s_flag) {
-				std::cout << std::format("Thread {} failed to access target url, try time exhausted, skip. \n\turl : {} \n", 6, max_repeat_times,target);
+				std::cout << std::format("Thread {} failed to access target url, try time exhausted, skip. \n\turl : {} \n", 6, remaining_repest_times,target);
+				m_ulock.lock();
+				toDownload.push(tile_to_download);
+				m_ulock.unlock();
 				continue;
 			}
+			else {
+				m_ulock.lock();
+				hosts.push(host);
+				m_ulock.unlock();
+			}
+
 
 			bool got_dem = headers.size() >= 3 && headers[3].size() == 40 && headers[3].substr(14, 11) == "image/jpeg;";
 			if (!got_dem) {
-				std::cout << std::format("Thread {} target url contains no DEM\n\turl : {} \n", idx + 1, max_repeat_times, target);
+				std::cout << std::format("Thread {} target url contains no DEM\n\turl : {} \n", idx + 1, target);
 				continue;
 			}
 
@@ -134,15 +173,15 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 			char* buf = m_inflate(response.str(), &deflate_return);
 
 			std::stringstream ss;
-			std::string f_loc = targetDir.string() + std::string("/") + t.ConvertToFilename();
+			std::string f_loc = targetDir.string() + std::string("/") + tile_to_download.ConvertToFilename();
 			std::fstream f(f_loc, std::ios::binary | std::ios::out);
 			f.write(buf,deflate_return);
 			f.close();
 
 			delete[] buf;
 
-			std::cout << std::format("Thread {} preserving DEM to\n\tpath: {} \n", idx + 1, f_loc);
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			std::cout << std::format("Thread {} preserving DEM to\n\tpath: {} \n", idx, f_loc);
+			std::this_thread::sleep_for(std::chrono::milliseconds(500 + dice_roller()));
 
 			//m_inflate(response.str());
 
@@ -171,10 +210,10 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 
 }
 
-void downloadTerrainIn(double lon_start, double lon_end, double lat_start, double lat_end, int layer, const std::filesystem::path& targetDir) {
+void downloadTerrainIn(double lon_start, double lon_end, double lat_start, double lat_end, int layer, const std::filesystem::path& targetDir, const std::string& token) {
 	std::queue<tile> toDownload = generateTerrainSetIn(lon_start, lon_end, lat_start, lat_end, layer);
 
-	downloadTerrainSet(toDownload, targetDir);
+	downloadTerrainSet(toDownload, targetDir,token);
 }
 
 void test() {

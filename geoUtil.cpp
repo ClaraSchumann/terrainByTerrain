@@ -69,8 +69,9 @@ int main(int argc, char* argv[])
 			size_t layer_highest = work["layer_highest"].as<size_t>();
 			double margin = work["margin"].as<double>();
 			auto out_dem_directory = std::filesystem::path(work["out_dem_directory"].as<std::string>());
+			auto token = work["tianditu_token"].as<std::string>();
 			for (size_t layer = layer_lowest; layer <= layer_highest; layer++) {
-				downloadTerrainIn(src_obj_profile.wgs84_lon - margin, src_obj_profile.wgs84_lon + margin, src_obj_profile.wgs84_lat - margin, src_obj_profile.wgs84_lat + margin, layer, out_dem_directory);
+				downloadTerrainIn(src_obj_profile.wgs84_lon - margin, src_obj_profile.wgs84_lon + margin, src_obj_profile.wgs84_lat - margin, src_obj_profile.wgs84_lat + margin, layer, out_dem_directory,token);
 			};
 			break;
 		}
