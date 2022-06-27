@@ -72,7 +72,7 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path) 
 		num_threads = 1;
 
 	// For debugging.
-	//num_threads = 1;
+	// num_threads = 1;
 
 	cvtfunc_get_type<double>::vector_type vertices_raw(num_threads);
 	cvtfunc_get_type<int>::vector_type faces_raw(num_threads);
@@ -111,9 +111,9 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path) 
 				if (buffer[local_line_headers[i] + 1] != ' ' && buffer[local_line_headers[i] + 1] != '\t')
 					continue;
 				char* tmp = buffer + local_line_headers[i] + 2;
-				v_buffer[v_loc++] = std::strtod(tmp, &tmp);
-				v_buffer[v_loc++] = std::strtod(tmp, &tmp);
-				v_buffer[v_loc++] = std::strtod(tmp, &tmp);
+				v_buffer[v_loc++] = std::strtod(tmp, &tmp); //assert(v_buffer[v_loc - 1] != 0);
+				v_buffer[v_loc++] = std::strtod(tmp, &tmp); //assert(v_buffer[v_loc - 1] != 0);
+				v_buffer[v_loc++] = std::strtod(tmp, &tmp); //assert(v_buffer[v_loc - 1] != 0);
 				//sscanf_s(buffer + line_headers[i], "v %lf %lf %lf\n", &v1, &v2, &v3);
 				//vertices_s.push_back({ v1,v2,v3 });
 				break;
@@ -122,15 +122,15 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path) 
 				if (buffer[local_line_headers[i] + 1] != ' ' && buffer[local_line_headers[i] + 1] != '\t')
 					continue;
 				char* tmp = buffer + local_line_headers[i] + 2;
-				f_buffer[f_loc++] = std::strtoll(tmp, &tmp, 10);
+				f_buffer[f_loc++] = std::strtoll(tmp, &tmp, 10) - 1;
 				while (*tmp != ' ' && *tmp != '\t') {
 					tmp++;
 				};
-				f_buffer[f_loc++] = std::strtoll(tmp, &tmp, 10);
+				f_buffer[f_loc++] = std::strtoll(tmp, &tmp, 10) - 1;
 				while (*tmp != ' ' && *tmp != '\t') {
 					tmp++;
 				};
-				f_buffer[f_loc++] = std::strtoll(tmp, &tmp, 10);
+				f_buffer[f_loc++] = std::strtoll(tmp, &tmp, 10) - 1;
 				//sscanf_s(buffer + line_headers[i], "f %llu %llu %llu\n", &v1, &v2, &v3);
 				//faces_s.push_back({ v1,v2,v3 });
 				break;
@@ -169,5 +169,6 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path) 
 	for (auto& p : faces_raw) {
 		delete[] p.first;
 	}
+	delete[] buffer;
 	return {V,F};
 }

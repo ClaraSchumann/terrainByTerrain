@@ -66,3 +66,5 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 	, size_t y_start, size_t y_end);
 
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path);
+
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_mergeObj(const std::string& path);

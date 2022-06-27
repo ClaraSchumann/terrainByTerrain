@@ -11,7 +11,29 @@ works:
     out_dem_directory: "C:/2021/model_0624/mid/dem_raw"
   -
     operation: read_obj
-    apply: true
+    apply: false
+    display: false
     path: "C:/2021/model_0624/models/terra_obj/texture_BABBA.obj"
-    #path: "C:/2021/BaiGe/obj/terra_obj_min/texture.obj"
+  -
+    operation: merge_obj
+    apply: false
+    # test on a large mesh, use 70GB memory when displaying it using libigl. 
+    path: "C:/2021/model_0624/models/terra_obj"
+    # test on a small mesh
+    # path: "C:/2021/BaiGe/obj/terra_obj_min/texture.obj"
+    display: false
+    store: true
+    storePath: "C:/2021/model_0624/mid/merged_high_resolution.obj"
+  -
+    operation: read_obj
+    apply: false
+    display: true
+    path: "C:/2021/model_0624/mid/merged_high_resolution.obj"
+  -
+    operation: rectification
+    apply: true
+    model_type: obj
+    path: "C:/2021/model_0624/mid/merged_high_resolution.obj"
+    src_dem_directory: "C:/2021/model_0624/mid/dem_raw"
+    out_dem_directory: "C:/2021/model_0624/mid/dem_rectified"
     

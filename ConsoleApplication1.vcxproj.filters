@@ -39,6 +39,9 @@
     <ClCompile Include="m_readObj.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="m_mergeObj.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="projection.h">

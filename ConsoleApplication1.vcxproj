@@ -151,6 +151,7 @@
     <ClCompile Include="geoUtil.cpp" />
     <ClCompile Include="getTerrain.cpp" />
     <ClCompile Include="KEY.cpp" />
+    <ClCompile Include="m_mergeObj.cpp" />
     <ClCompile Include="m_readObj.cpp" />
     <ClCompile Include="obj_profile.cpp" />
     <ClCompile Include="projection.cpp" />

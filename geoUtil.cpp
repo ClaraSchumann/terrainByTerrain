@@ -30,7 +30,7 @@ void snippets() {
 		//downloadTerrainIn(lon_cen - margin, lon_cen + margin, lat_cen - margin, lat_cen + margin, layer);
 	};
 
-	// Test download DEM. 
+	// Test download DEM.
 	test();
 
 	// Transform terrain object to WGS84, with the lon/lats scaled up by 111000 to make is prettier.
@@ -80,7 +80,25 @@ int main(int argc, char* argv[])
 		case "read_obj"_sh: {
 			std::string path = work["path"].as<std::string>();
 			auto [V, F] = m_readObj(path);
+			if (work["display"].as<bool>()) {
+				showMesh(V, F);
+			}
+			break;
 		};
+		case "merge_obj"_sh: {
+			std::string path = work["path"].as < std::string>();
+			auto [V, F] = m_mergeObj(path);
+			if (work["display"].as<bool>()) {
+				showMesh(V, F);
+			}
+			if (work["store"].as<bool>()) {
+				igl::writeOBJ(work["storePath"].as<std::string>(), V, F);
+			}
+			break;
+		};
+		case "rectification"_sh: {
+			break;
+		}
 		default:
 			std::cout << fmt::format("Operation {} not recognized!\n", operation);
 			break;
