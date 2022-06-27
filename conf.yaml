@@ -1,15 +1,17 @@
+# Original .obj files, in which a 'metadata.xml' must exist to retrieve spatial information.
 obj_directory: "C:/2021/model_0624/models/terra_obj"
 
 works:
   - 
     operation: download_dem_raw
-    apply: true
+    apply: false
     layer_lowest: 7
     layer_highest: 12
     margin: 1
     out_dem_directory: "C:/2021/model_0624/mid/dem_raw"
   -
-    operation: show_model
-    type: obj
-    path: "C:/2021/model_0624/models/terra_obj/texture_BABBA.obj"
+    operation: read_obj
+    apply: true
+    #path: "C:/2021/model_0624/models/terra_obj/texture_BABBA.obj"
+    path: "C:/2021/BaiGe/obj/terra_obj_min/texture.obj"
     

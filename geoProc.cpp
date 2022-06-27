@@ -56,7 +56,7 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> getTerrainVF() {
 
 	std::cout << "Coordinates Transfrom Start\n";
 	auto worker = [&](int idx, int start, int end) {
-		std::cout << std::format("Threads {}, begin {} , end {}.\n", idx, start, end);
+		std::cout << fmt::format("Threads {}, begin {} , end {}.\n", idx, start, end);
 		int local_rows = end - start;
 		Eigen::MatrixXd l(local_rows, 3);
 
@@ -381,7 +381,7 @@ void interpolation_old() {
 			bool inTriangle = ptInTriangle(searchPoint, (*cloud)[pointIdxKNNSearch[0]], (*cloud)[pointIdxKNNSearch[1]], (*cloud)[pointIdxKNNSearch[2]]);
 			inTriangle = true;
 			if (!inTriangle) {
-				std::cout << std::format("Point {} is in the rectangular bounding box but not on the model. \n", i);
+				std::cout << fmt::format("Point {} is in the rectangular bounding box but not on the model. \n", i);
 				continue;
 			}
 
@@ -389,8 +389,8 @@ void interpolation_old() {
 			double model_min = std::min(V_model(pointIdxKNNSearch[0], 2), std::min(V_model(pointIdxKNNSearch[1], 2), V_model(pointIdxKNNSearch[2], 2)));
 			double tmp = V_terrain(i, 2);
 			V_terrain(i, 2) = model_min - lower;
-			std::cout << std::format("The height of point {} has been rectified from {} to {}. \n", i, tmp, model_min - 2);
-			std::cout << std::format("Target point, Latitude : {}, Lontitude:{} \n", V_terrain(i, 1) / degree2meter, V_terrain(i, 0) / degree2meter);
+			std::cout << fmt::format("The height of point {} has been rectified from {} to {}. \n", i, tmp, model_min - 2);
+			std::cout << fmt::format("Target point, Latitude : {}, Lontitude:{} \n", V_terrain(i, 1) / degree2meter, V_terrain(i, 0) / degree2meter);
 		}
 	}
 

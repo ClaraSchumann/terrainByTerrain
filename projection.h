@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <zlib.h>
+#include <fmt/format.h>
 
 extern const char* workDirectory;
 extern const char* terrainRaw;

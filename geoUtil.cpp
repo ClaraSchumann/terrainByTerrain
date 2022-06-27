@@ -19,6 +19,7 @@ extern int targetModel_origin_EPSG = 32647;
 
 extern double degree2meter = 111000; // Need not be precise.
 
+/*
 void snippets() {
 	// Download DEM.
 	double margin = 1;
@@ -38,6 +39,7 @@ void snippets() {
 	// Generate mosaicked DEM in .obj format.
 	// auto [V, F] = geo_demo_3(12, 3170, 3172, 668, 672);
 }
+*/
 
 int main(int argc, char* argv[])
 {
@@ -71,12 +73,16 @@ int main(int argc, char* argv[])
 			auto out_dem_directory = std::filesystem::path(work["out_dem_directory"].as<std::string>());
 			auto token = work["tianditu_token"].as<std::string>();
 			for (size_t layer = layer_lowest; layer <= layer_highest; layer++) {
-				downloadTerrainIn(src_obj_profile.wgs84_lon - margin, src_obj_profile.wgs84_lon + margin, src_obj_profile.wgs84_lat - margin, src_obj_profile.wgs84_lat + margin, layer, out_dem_directory,token);
+				downloadTerrainIn(src_obj_profile.wgs84_lon - margin, src_obj_profile.wgs84_lon + margin, src_obj_profile.wgs84_lat - margin, src_obj_profile.wgs84_lat + margin, layer, out_dem_directory, token);
 			};
 			break;
-		}
+		};
+		case "read_obj"_sh: {
+			std::string path = work["path"].as<std::string>();
+			auto [V, F] = m_readObj(path);
+		};
 		default:
-			std::cout << std::format("Operation {} not recognized!\n", operation);
+			std::cout << fmt::format("Operation {} not recognized!\n", operation);
 			break;
 		}
 	}

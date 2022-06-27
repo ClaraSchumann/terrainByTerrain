@@ -3,11 +3,10 @@
 #include <exception>
 #include <regex>
 #include <algorithm>
+#include <thread>
 
-#include <igl/all.h>
 #include <igl/writeOBJ.h>
 #include <igl/readOBJ.h>
-#include <igl/readOFF.h>
 #include <igl/opengl/glfw/Viewer.h>
 
 #include <opencv2/core/eigen.hpp>
@@ -65,3 +64,5 @@ void interpolation(double);
 
 void regenerateDEMFiles(const std::string& loc, const std::string& modified, size_t layer, size_t x_start, size_t x_end
 	, size_t y_start, size_t y_end);
+
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path);

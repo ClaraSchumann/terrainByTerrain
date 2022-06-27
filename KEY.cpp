@@ -131,11 +131,11 @@ void interpolation(double lower) {
 		}
 
 		if (count == 0) {
-			std::cout << std::format("{} isn't in any model faces. \n", i);
+			std::cout << fmt::format("{} isn't in any model faces. \n", i);
 			continue;
 		}
 		else {
-			std::cout << std::format("{} is located in {} faces, it is lowered from {} to {}. \n", i, count, V_terrain(i, 2), all_min_height - lower);
+			std::cout << fmt::format("{} is located in {} faces, it is lowered from {} to {}. \n", i, count, V_terrain(i, 2), all_min_height - lower);
 			size_t row_idx = i / mosaicked_width;
 			size_t col_idx = i % mosaicked_width;
 			if (row_idx < min_row)
@@ -150,7 +150,7 @@ void interpolation(double lower) {
 		}
 	}
 
-	std::cout << std::format("Modified extent in the merged DEM picture: \n row: {} {}\n col: {} {} \n", min_row, max_row, min_col, max_col) << std::endl;
+	std::cout << fmt::format("Modified extent in the merged DEM picture: \n row: {} {}\n col: {} {} \n", min_row, max_row, min_col, max_col) << std::endl;
 
 	igl::writeOBJ("C:\\2021\\BaiGe\\GeoProcess\\L12_rectified.obj", V_terrain, F_terrain);
 
@@ -200,7 +200,7 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 			if (r(i, j) > n[6]) {
 				double sum = 0;
 				sum = std::accumulate(n.begin(), n.end(), sum);
-				std::cout << std::format(" Pixel value at {} {} modified from {} to {}.\n", i, j, r(i, j), sum / 9);
+				std::cout << fmt::format(" Pixel value at {} {} modified from {} to {}.\n", i, j, r(i, j), sum / 9);
 				r(i, j) = sum / 9;
 			}
 		}
@@ -235,7 +235,7 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 
 	for (auto& t : toStore) {
 		t.d.block(0, 0, 150, 150) = r.block((t.y - y_start) * 150, (t.x - x_start) * 150, 150, 150);
-		std::ofstream f(std::format("{}\\{}_{}_{}", targetDir.string(), t.layer, t.x, t.y), std::ios::binary | std::ios::out);
+		std::ofstream f(fmt::format("{}\\{}_{}_{}", targetDir.string(), t.layer, t.x, t.y), std::ios::binary | std::ios::out);
 		f.write((char*)t.d.data(), 45000);
 	}
 

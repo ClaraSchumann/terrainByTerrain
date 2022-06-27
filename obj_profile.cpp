@@ -10,7 +10,7 @@ ObjProfile getObjProfile(const std::filesystem::path& p) {
 	buffer << f.rdbuf();
 	auto xml_string = buffer.str();
 
-	std::cout << xml_string;
+	//std::cout << xml_string;
 
 	using namespace rapidxml;
 	xml_document<> doc;

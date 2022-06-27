@@ -11,11 +11,11 @@ constexpr int NUM_THREADS = 8;
 
 
 std::string tile::ConvertToFilename() {
-	return std::format("{}_{}_{}", l, x, y);
+	return fmt::format("{}_{}_{}", l, x, y);
 }
 
 std::string tile::ConvertToQueryParameter() {
-	return std::format("&x={}&y={}&l={}", x, y, l);
+	return fmt::format("&x={}&y={}&l={}", x, y, l);
 }
 
 std::queue<tile> generateTerrainSetIn(double lon_start, double lon_end, double lat_start, double lat_end, int layer) {
@@ -47,7 +47,7 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 
 	std::queue<std::string> hosts;
 	for (int i = 0; i < 8; i++) {
-		hosts.push(std::format("https://t{}.tianditu.gov.cn", i));
+		hosts.push(fmt::format("https://t{}.tianditu.gov.cn", i));
 	};
 
 	std::mutex m_mutex; // Mutex for task queue.
@@ -97,9 +97,9 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 			auto loc_headers = headers;
 			loc_headers.push_back("Host: " + host);
 
-			std::string target = std::format("/mapservice/swdx?tk={}&x={}&y={}&l={}",user_token, tile_to_download.x, tile_to_download.y, tile_to_download.l);
+			std::string target = fmt::format("/mapservice/swdx?tk={}&x={}&y={}&l={}",user_token, tile_to_download.x, tile_to_download.y, tile_to_download.l);
 			target = host + target;
-			std::cout << std::format("Thread {} is retrieving file from : \n\t{} \n", idx + 1, target);
+			std::cout << fmt::format("Thread {} is retrieving file from : \n\t{} \n", idx + 1, target);
 
 			std::vector<std::string> headers;
 			auto HeaderCallback = [&](char* ptr, size_t size, size_t nmemb)->size_t
@@ -128,29 +128,29 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 				if (return_code != 200) {
 					switch (return_code) {
 					case 418:
-						std::cout << std::format("Thread {} failed to access target url with return_code 418.\n\t{} blocked this address. \n", idx, host);
+						std::cout << fmt::format("Thread {} failed to access target url with return_code 418.\n\t{} blocked this address. \n", idx, host);
 						remaining_repest_times = 0;
 						continue;
 					case 403:
-						std::cout << std::format("Thread {} failed to access target url with return_code 403.\n\t{} refused the credentials. \n", idx, host);
+						std::cout << fmt::format("Thread {} failed to access target url with return_code 403.\n\t{} refused the credentials. \n", idx, host);
 						remaining_repest_times = 0;
 						continue;
 					default:
-						std::cout << std::format("Thread {} failed to access target url with return_code {}. Retry.\n\t", idx,return_code, host);
+						std::cout << fmt::format("Thread {} failed to access target url with return_code {}. Retry.\n\t", idx,return_code, host);
 						break;
 					}
 					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 					remaining_repest_times--;
-					std::cout << std::format("Thread {} failed to access target url, \n\t{} times remained. \n", idx, remaining_repest_times);
+					std::cout << fmt::format("Thread {} failed to access target url, \n\t{} times remained. \n", idx, remaining_repest_times);
 				}
 				else {
-					std::cout << std::format("Thread {} access target url successfully. \n\t{}\n", idx, target);
+					std::cout << fmt::format("Thread {} access target url successfully. \n\t{}\n", idx, target);
 					s_flag = true;
 				}
 			};
 
 			if (!s_flag) {
-				std::cout << std::format("Thread {} failed to access target url, try time exhausted, skip. \n\turl : {} \n", 6, remaining_repest_times,target);
+				std::cout << fmt::format("Thread {} failed to access target url, try time exhausted, skip. \n\turl : {} \n", 6, remaining_repest_times,target);
 				m_ulock.lock();
 				toDownload.push(tile_to_download);
 				m_ulock.unlock();
@@ -165,7 +165,7 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 
 			bool got_dem = headers.size() >= 3 && headers[3].size() == 40 && headers[3].substr(14, 11) == "image/jpeg;";
 			if (!got_dem) {
-				std::cout << std::format("Thread {} target url contains no DEM\n\turl : {} \n", idx + 1, target);
+				std::cout << fmt::format("Thread {} target url contains no DEM\n\turl : {} \n", idx + 1, target);
 				continue;
 			}
 
@@ -180,7 +180,7 @@ void downloadTerrainSet(std::queue<tile> toDownload, const std::filesystem::path
 
 			delete[] buf;
 
-			std::cout << std::format("Thread {} preserving DEM to\n\tpath: {} \n", idx, f_loc);
+			std::cout << fmt::format("Thread {} preserving DEM to\n\tpath: {} \n", idx, f_loc);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500 + dice_roller()));
 
 			//m_inflate(response.str());

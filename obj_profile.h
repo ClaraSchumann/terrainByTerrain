@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <iostream>
+#include <sstream>
 
 #include <rapidxml/rapidxml.hpp>
 #include <proj.h>
