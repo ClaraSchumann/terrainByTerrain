@@ -12,6 +12,6 @@ works:
   -
     operation: read_obj
     apply: true
-    #path: "C:/2021/model_0624/models/terra_obj/texture_BABBA.obj"
-    path: "C:/2021/BaiGe/obj/terra_obj_min/texture.obj"
+    path: "C:/2021/model_0624/models/terra_obj/texture_BABBA.obj"
+    #path: "C:/2021/BaiGe/obj/terra_obj_min/texture.obj"
     
