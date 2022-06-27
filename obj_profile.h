@@ -6,7 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <rapidxml/rapidxml.hpp>
 #include <proj.h>
 
 struct ObjProfile {
@@ -36,4 +35,4 @@ struct ObjProfile {
 	};
 };
 
-ObjProfile getObjProfile(const std::filesystem::path& p);
+ObjProfile getObjProfile(const std::string& p);

@@ -149,12 +149,16 @@
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="geoProc.cpp" />
     <ClCompile Include="geoUtil.cpp" />
+    <ClCompile Include="getExtent.cpp" />
     <ClCompile Include="getTerrain.cpp" />
+    <ClCompile Include="getTerrainParts.cpp" />
     <ClCompile Include="KEY.cpp" />
     <ClCompile Include="m_mergeObj.cpp" />
     <ClCompile Include="m_readObj.cpp" />
     <ClCompile Include="obj_profile.cpp" />
     <ClCompile Include="projection.cpp" />
+    <ClCompile Include="rectify.cpp" />
+    <ClCompile Include="transformationToWgs84.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="geoProc.h" />

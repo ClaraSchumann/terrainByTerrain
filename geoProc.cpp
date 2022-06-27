@@ -143,8 +143,9 @@ Eigen::MatrixXd getVertices(DEM_TYPE value,
 	size_t count = 0;
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
-			V(count, 1) = (start_lat - 360.f / seg * i / 150.) * degree2meter;
-			V(count, 0) = (start_lon + 360.f / seg * j / 150.) * degree2meter;
+			// TODO: Check whether the scaling coefficent should be 149 or 150.
+			V(count, 1) = (start_lat - 360.f / seg * i / 149.) * degree2meter;
+			V(count, 0) = (start_lon + 360.f / seg * j / 149.) * degree2meter;
 			V(count, 2) = value(i, j);
 			count++;
 		}
@@ -199,8 +200,8 @@ std::vector<tmp> getTerrainPartsAll(int layer) {
 	return DEM_parts;
 };
 
-std::vector<tmp> getTerrainPartsWithLimit(int layer, size_t x_start, size_t x_end, size_t y_start, size_t y_end) {
-	std::filesystem::path terrainDir(terrainRaw);
+std::vector<tmp> getTerrainPartsWithLimit(int layer, size_t x_start, size_t x_end, size_t y_start, size_t y_end, const std::string& dem_raw) {
+	std::filesystem::path terrainDir(dem_raw);
 	if (!std::filesystem::is_directory(terrainDir)) {
 		throw std::exception("TerrainDir is not a valid path.");
 	}
@@ -312,7 +313,7 @@ void geo_demo_2(size_t layer) {
 }
 
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> geo_demo_3(size_t layer, size_t x_start, size_t x_end, size_t y_start, size_t y_end) {
-	auto p = getTerrainPartsWithLimit(layer, x_start, x_end, y_start, y_end);
+	auto p = getTerrainPartsWithLimit(layer, x_start, x_end, y_start, y_end,"discarded");
 	auto [V, F] = mergeTerrainParts(p);
 
 	igl::writeOBJ("L12.obj", V, F);

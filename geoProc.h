@@ -19,6 +19,7 @@
 #include "projection.h"
 
 #include "proj.h"
+#include "obj_profile.h"
 
 using DEM_TYPE = Eigen::Matrix<unsigned short, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 struct tmp {
@@ -42,7 +43,7 @@ void terrainObjToWGS84();
 
 std::vector<tmp> getTerrainPartsAll(int layer);
 
-std::vector<tmp> getTerrainPartsWithLimit(int layer, size_t x_start, size_t x_end, size_t y_start, size_t y_end);
+std::vector<tmp> getTerrainPartsWithLimit(int layer, size_t x_start, size_t x_end, size_t y_start, size_t y_end, const std::string& dem_raw);
 
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> mergeTerrainParts(const std::vector<tmp>&);
 
@@ -68,3 +69,21 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_readObj(const std::string& path);
 
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> m_mergeObj(const std::string& path);
+
+auto transformationToWgs84(Eigen::MatrixXd V, const ObjProfile& p, double scale) -> decltype(V);
+
+std::tuple<size_t, size_t, size_t, size_t> getExtent(size_t layer, const Eigen::MatrixXd& vertices, double scale);
+
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXi> getTerrainParts(size_t layer, size_t x_min, size_t x_max, size_t y_min, size_t y_max, const std::string& src_dem_dir);
+
+std::tuple<Eigen::MatrixXd, size_t, size_t, size_t, size_t> rectify(double lower,
+	const Eigen::MatrixXd& V_model,
+	const Eigen::MatrixXd& V_terrain_src,
+	const Eigen::MatrixXi& F_model,
+	const Eigen::MatrixXi& F_terrain,
+	size_t number_bins,
+	size_t mosaicked_width
+);
+
+bool ptInTriangle(double px, double py, double p0x, double p0y, double p1x, double p1y,
+	double p2x, double p2y);

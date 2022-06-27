@@ -1,6 +1,8 @@
 #include "obj_profile.h"
+#include <rapidxml/rapidxml.hpp>
 
-ObjProfile getObjProfile(const std::filesystem::path& p) {
+ObjProfile getObjProfile(const std::string& p_str) {
+	std::filesystem::path p(p_str);
 	if (!std::filesystem::is_regular_file(p)) {
 		throw std::exception("metadata.xml does not exist.");
 	}

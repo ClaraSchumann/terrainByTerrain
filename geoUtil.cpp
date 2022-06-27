@@ -50,13 +50,15 @@ int main(int argc, char* argv[])
 		configureFile = argv[1];
 	auto configuration = YAML::LoadFile(configureFile.c_str());
 
+	/* old settings
 	auto obj_directory = configuration["obj_directory"].as<std::string>();
 	auto obj_directory_path = std::filesystem::path(obj_directory);
 	if (!std::filesystem::is_directory(obj_directory_path)) {
 		throw std::exception("Please verify the directory containing .obj files");
 	}
+	*/
 
-	ObjProfile src_obj_profile = getObjProfile(obj_directory_path / "metadata.xml");
+	// TODO: add a local version of "m_writeObj", for higher precision (especially when using lon/lat as coordinates) and better performance.
 
 	auto works = configuration["works"];
 	for (int i = 0; i < works.size(); i++) {
@@ -67,11 +69,13 @@ int main(int argc, char* argv[])
 
 		switch (auto operation = hash_djb2a(work["operation"].as<std::string>())) {
 		case "download_dem_raw"_sh: {
+			std::string obj_xml = work["obj_xml"].as<std::string>();
 			size_t layer_lowest = work["layer_lowest"].as<size_t>();
 			size_t layer_highest = work["layer_highest"].as<size_t>();
 			double margin = work["margin"].as<double>();
 			auto out_dem_directory = std::filesystem::path(work["out_dem_directory"].as<std::string>());
 			auto token = work["tianditu_token"].as<std::string>();
+			ObjProfile src_obj_profile = getObjProfile(obj_xml);
 			for (size_t layer = layer_lowest; layer <= layer_highest; layer++) {
 				downloadTerrainIn(src_obj_profile.wgs84_lon - margin, src_obj_profile.wgs84_lon + margin, src_obj_profile.wgs84_lat - margin, src_obj_profile.wgs84_lat + margin, layer, out_dem_directory, token);
 			};
@@ -96,7 +100,45 @@ int main(int argc, char* argv[])
 			}
 			break;
 		};
+		case "transformation"_sh: {
+			std::string source_path = work["source_path"].as<std::string>();
+			std::string target_path = work["target_path"].as<std::string>();
+			std::string obj_xml = work["obj_xml"].as<std::string>();
+			double lonlat_scale = work["lonlat_scale"].as<double>();
+			auto [V, F] = m_readObj(source_path);
+			ObjProfile src_obj_profile = getObjProfile(obj_xml);
+			auto V_transformed = transformationToWgs84(V, src_obj_profile, lonlat_scale);
+			igl::writeOBJ(target_path, V_transformed, F);
+
+			break;
+		}
 		case "rectification"_sh: {
+			size_t start_layer = work["start_layer"].as<size_t>();
+			size_t end_layer = work["end_layer"].as<size_t>();
+			double lonlat_scale = work["lonlat_scale"].as<double>();
+			std::string reference_model_path = work["reference_model_path"].as<std::string>();
+			std::string tmp_directory = work["tmp_path"].as<std::string>();
+			if (!std::filesystem::is_directory(tmp_directory)) {
+				std::filesystem::create_directory(tmp_directory);
+			};
+			std::filesystem::path tmp_dir(tmp_directory);
+			std::string source_dem_directory = work["src_dem_directory"].as<std::string>();
+			;
+			auto [V, F] = m_readObj(reference_model_path);
+			for (size_t i = start_layer; i <= end_layer; i++) {
+				auto [x_min, x_max, y_min, y_max] = getExtent(i, V, lonlat_scale);
+				auto [terrain_V, terrain_F] = getTerrainParts(i, x_min,
+					x_max, y_min, y_max, source_dem_directory);
+				auto [terrain_V_modified, min_row, max_row, min_col, max_col] = rectify(
+					work["lower"].as<double>(),
+					V, terrain_V, F, terrain_F,
+					work["grid"].as<double>(),
+					(x_max - x_min + 1) * 150
+				);
+				igl::writeOBJ((tmp_dir / fmt::format("concatenated_terrain_{}_{}_{}_{}_{}.obj", i, x_min, x_max, y_min, y_max)).string(), terrain_V,terrain_F);
+				igl::writeOBJ((tmp_dir / fmt::format("modified_concatenated_terrain_{}_{}_{}_{}_{}.obj", i, x_min, x_max, y_min, y_max)).string(), terrain_V_modified, terrain_F);
+				regenerateDEMFiles(work["out_dem_directory"].as<std::string>(), (tmp_dir / fmt::format("modified_concatenated_terrain_{}_{}_{}_{}_{}.obj", i, x_min, x_max, y_min, y_max)).string(), i, x_min, x_max, y_min, y_max);
+			}
 			break;
 		}
 		default:

@@ -1,6 +1,3 @@
-# Original .obj files, in which a 'metadata.xml' must exist to retrieve spatial information.
-obj_directory: "C:/2021/model_0624/models/terra_obj"
-
 works:
   - 
     operation: download_dem_raw
@@ -9,6 +6,7 @@ works:
     layer_highest: 12
     margin: 1
     out_dem_directory: "C:/2021/model_0624/mid/dem_raw"
+    obj_xml: "C:/2021/model_0624/models/terra_obj/metadata.xml"
   -
     operation: read_obj
     apply: false
@@ -30,10 +28,31 @@ works:
     display: true
     path: "C:/2021/model_0624/mid/merged_high_resolution.obj"
   -
+    operation: read_obj
+    apply: false
+    display: true
+    path: "C:/2021/model_0624/mid/wgs84_merged_high_resolution.obj"
+  -
     operation: rectification
     apply: true
     model_type: obj
-    path: "C:/2021/model_0624/mid/merged_high_resolution.obj"
+    # Only modify the most detailed level of DEM
+    lonlat_scale: 111000
+    start_layer: 12
+    end_layer: 12
+    grid: 100
+    lower: 5000
+    tmp_path:  "C:/2021/model_0624/mid/tmp"
+    reference_model_path: "C:/2021/model_0624/mid/wgs84_merged_high_resolution.obj"
     src_dem_directory: "C:/2021/model_0624/mid/dem_raw"
     out_dem_directory: "C:/2021/model_0624/mid/dem_rectified"
+  -
+    operation: transformation
+    apply: false
+    model_type: obj
+    source_path: "C:/2021/model_0624/mid/merged_high_resolution.obj"
+    target_path: "C:/2021/model_0624/mid/wgs84_merged_high_resolution.obj"
+    # To make the .obj file reasonable when displaying
+    lonlat_scale: 111000
+    obj_xml: "C:/2021/model_0624/models/terra_obj/metadata.xml"
     

@@ -166,7 +166,8 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 		throw std::exception("Check Input file");
 	}
 	if (!std::filesystem::is_directory(targetDir)) {
-		throw std::exception("Check If the assigned output directories do exist.");
+		std::cout << fmt::format("{} doesn't exist, it will then be created.\n", targetDir.string());
+		std::filesystem::create_directory(targetDir);
 	}
 
 	Eigen::MatrixXd V;
@@ -189,7 +190,8 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 		}
 	}
 
-	size_t row_start = 340, row_end = 370, col_start = 140, col_end = 190;
+	/*
+	size_t row_start = y_start, row_end = y_end, col_start = x_start, col_end = x_end;
 	for (int i = row_start; i < row_end; i++) {
 		for (int j = col_start; j < col_end; j++) {
 			std::vector<double> n;
@@ -217,7 +219,7 @@ void regenerateDEMFiles(const std::string& loc, const std::string& modified, siz
 			r(i, j) = sum / 9;
 		}
 	}
-
+	*/
 
 
 	/*

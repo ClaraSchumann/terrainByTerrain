@@ -42,6 +42,18 @@
     <ClCompile Include="m_mergeObj.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="transformationToWgs84.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="getExtent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="getTerrainParts.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="rectify.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="projection.h">
